@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: auth_db
+    #hostname: localhost
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: changethis
+      POSTGRES_DB: auth
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data/pgdata
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d auth" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+
+  api_auth:
+    container_name: auth_backend
+    build:
+      context: .
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+
+volumes:
+  pgdata:
+    driver: local

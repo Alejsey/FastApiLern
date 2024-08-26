@@ -1,26 +1,23 @@
 from fastapi import FastAPI
-from starlette.requests import Request
-from starlette.responses import RedirectResponse
-
-from app.exceptions import TokenNotFoundException
-from app.students.router import router as router_students
-from app.majors.router import router as router_majors
 from app.users.router import router as router_users
-from app.pages.router import router as router_pages
 from fastapi.staticfiles import StaticFiles
+from app.database import Base, engine
+
 
 app = FastAPI()
-
 app.mount('/static', StaticFiles(directory='app/static'), 'static')
+Base.metadata.create_all(engine)
 
 
 @app.get("/")
 def home_page():
-    return {"message": "Привет, Хабр!"}
+    return {"message": "Привет!"}
+
+
 
 
 
 app.include_router(router_users)
-app.include_router(router_students)
+"""app.include_router(router_students)
 app.include_router(router_majors)
-app.include_router(router_pages)
+app.include_router(router_pages)"""
